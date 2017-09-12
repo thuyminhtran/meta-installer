@@ -1,0 +1,108 @@
+meat-installer
+============
+The installation program is anaconda installer which
+ported from fedora 26.
+(https://fedoraproject.org/wiki/Anaconda)
+
+This layer provides a target-based installer for Yocto.
+It requires most of the layers that Yocto provides.
+
+There are two builds required, one is target build,
+another is host build.
+
+The image/packages of target build is installed on the target hard
+disk as user requirements.
+
+The image of host build is to run a installer program (anaconda)
+and do the installation.
+
+Dependencies
+------------
+This layer depends on the Yocto of bitbake, oe-core,
+meta-filesystems, meta-gnome, meta-python, meta-oe
+meta-networking, and meta-initramfs layer.
+
+URI: git://github.com/openembedded/openembedded-core.git
+branch: master
+revision: HEAD
+
+URI: git://github.com/openembedded/bitbake.git
+branch: master
+revision: HEAD
+
+URI: git://github.com/openembedded/meta-openembedded.git
+branch: master
+revision: HEAD
+
+
+Maintenance
+-----------
+Maintainers: Hongxu Jia <jiahongxujia@163.com> | <hongxu.jia@windriver.com>
+             Robert Yang <liezhi.yang@windriver.com>
+
+Contributing
+-----------
+TODO
+
+Building
+-----------
+The following example is to install a target image core-image-minimal
+by anaconda installer in host image core-image-install.
+
+mkdir -p /home/jiahongxu/yocto; cd /home/jiahongxu/yocto
+
+1) Clone away
+git clone git://git.openembedded.org/meta-openembedded
+git clone git://git.openembedded.org/openembedded-core oe-core
+cd oe-core
+git clone git://git.openembedded.org/bitbake
+
+2) Target build
+mkdir -p /home/jiahongxu/yocto/oe-core/build-target
+cd /home/jiahongxu/yocto/oe-core/build-target
+. ../oe-init-build-env
+
+# Edit conf/local.conf to use:
+echo 'DISTRO_FEATURES_append = " installer-support"' >> conf/local.conf
+
+# Edit conf/bblayers.conf to include other layers
+BBLAYERS ?= " \
+  /home/jiahongxu/yocto/oe-core/meta \
+  /home/jiahongxu/yocto/meta-openembedded/meta-python \
+  /home/jiahongxu/yocto/meta-openembedded/meta-gnome \
+  /home/jiahongxu/yocto/meta-openembedded/meta-filesystems \
+  /home/jiahongxu/yocto/meta-openembedded/meta-oe \
+  /home/jiahongxu/yocto/meta-openembedded/meta-networking \
+  /home/jiahongxu/yocto/meta-openembedded/meta-initramfs \
+  /home/jiahongxu/yocto/meta-installer \
+  "
+
+# Build the image which installed to target hard disk.
+bitbake core-image-minimal
+
+3) Host build
+mkdir -p /home/jiahongxu/yocto/oe-core/build-host
+cd /home/jiahongxu/yocto/oe-core/build-host
+. ../oe-init-build-env
+
+# Edit conf/local.conf to use:
+echo 'DISTRO = "installer"' >> conf/local.conf
+echo 'INSTALLER_TARGET_BUILD = "/home/jiahongxu/yocto/oe-core/build-target"' >> conf/local.conf
+echo 'INSTALLER_TARGET_IMAGE = "core-image-minimal"' >> conf/local.conf
+
+# Edit conf/bblayers.conf to include other layers
+BBLAYERS ?= " \
+  /home/jiahongxu/yocto/oe-core/meta \
+  /home/jiahongxu/yocto/meta-openembedded/meta-python \
+  /home/jiahongxu/yocto/meta-openembedded/meta-gnome \
+  /home/jiahongxu/yocto/meta-openembedded/meta-filesystems \
+  /home/jiahongxu/yocto/meta-openembedded/meta-oe \
+  /home/jiahongxu/yocto/meta-openembedded/meta-networking \
+  /home/jiahongxu/yocto/meta-openembedded/meta-initramfs \
+  /home/jiahongxu/yocto/meta-installer \
+  "
+
+# Build the image to run installer program
+bitbake core-image-installer
+
+
