@@ -1,0 +1,7 @@
+*.rej
+.pc/
+.gitignore
+*.orig
+*.swp
+*.pyc
+*.pyo
