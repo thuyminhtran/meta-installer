@@ -44,6 +44,19 @@ Contributing
 -----------
 TODO
 
+Limitation
+-----------
+1) Since OE use grub-efi to generate live image, the compatible host
+   is i.86|x86_64
+   (Set MACHINE = "qemux86-64|qemux86" in default build)
+
+2) The target installer based on fedora 26, so it requires:
+   - systemd as init manager
+   - python3
+   - dnf2/rpm4 pakcage management
+   - gobject-introspection which requires qemu-usermode
+     in MACHINE_FEATURES
+
 Building
 -----------
 The following example is to install a target image core-image-minimal
