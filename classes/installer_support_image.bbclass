@@ -26,4 +26,7 @@ python emit_image_env () {
 python __anonymous () {
     if not bb.utils.contains("PACKAGE_CLASSES", "package_rpm", True, False, d):
         raise bb.parse.SkipPackage('Target build requires RPM packages to be the default in PACKAGE_CLASSES.')
+
+    if d.getVar("VIRTUAL-RUNTIME_init_manager", True) != "systemd":
+        raise bb.parse.SkipPackage('Target build requires systemd, set VIRTUAL-RUNTIME_init_manager = "systemd" in local.conf')
 }
