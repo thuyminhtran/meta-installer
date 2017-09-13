@@ -14,7 +14,7 @@ The image/packages of target build is installed on the target hard
 disk as user requirements.
 
 The image of host build is to run a installer program (anaconda)
-and do the installation.
+and install image/packages of target build to hard disk.
 
 Dependencies
 ------------
@@ -62,8 +62,14 @@ mkdir -p /home/jiahongxu/yocto/oe-core/build-target
 cd /home/jiahongxu/yocto/oe-core/build-target
 . ../oe-init-build-env
 
+# The build requires 'installer-support' in DISTRO_FEATURES to
+# help installation. It also requires RPM packages and systemd
+# init manager.
 # Edit conf/local.conf to use:
 echo 'DISTRO_FEATURES_append = " installer-support"' >> conf/local.conf
+echo 'PACKAGE_CLASSES = "package_rpm"' >> conf/local.conf
+echo 'VIRTUAL-RUNTIME_init_manager = "systemd"' >> conf/local.conf
+echo 'DISTRO_FEATURES_append = " systemd"' >> conf/local.conf
 
 # Edit conf/bblayers.conf to include other layers
 BBLAYERS ?= " \
@@ -77,7 +83,7 @@ BBLAYERS ?= " \
   /home/jiahongxu/yocto/meta-installer \
   "
 
-# Build the image which installed to target hard disk.
+# Build image which will be installed to target hard disk.
 bitbake core-image-minimal
 
 3) Host build
@@ -85,6 +91,8 @@ mkdir -p /home/jiahongxu/yocto/oe-core/build-host
 cd /home/jiahongxu/yocto/oe-core/build-host
 . ../oe-init-build-env
 
+# The build requires DISTRO = "installer", location of target
+# build and recipe name of target image.
 # Edit conf/local.conf to use:
 echo 'DISTRO = "installer"' >> conf/local.conf
 echo 'INSTALLER_TARGET_BUILD = "/home/jiahongxu/yocto/oe-core/build-target"' >> conf/local.conf
