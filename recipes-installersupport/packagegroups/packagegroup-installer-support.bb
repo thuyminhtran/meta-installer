@@ -11,6 +11,7 @@ RDEPENDS_${PN} = " \
     shadow \
     efibootmgr \
     kmod \
+    lvm2 \
     util-linux-mount \
     init-ifupdown \
     libuser \
