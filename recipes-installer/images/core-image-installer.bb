@@ -6,7 +6,7 @@ LICENSE = "MIT"
 inherit core-image installer_image
 
 # Support installation from initrd boot
-do_image_complete[depends] += "core-image-installer-initramfs:do_image_complete"
+do_image_complete[depends] += "${PN}-initramfs:do_image_complete"
 
 DEPENDS += "isomd5sum-native \
 "
