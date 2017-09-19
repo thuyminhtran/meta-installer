@@ -128,7 +128,7 @@ FILES_${PN} = "/lib ${libdir} ${sysconfdir} ${bindir} ${sbindir} ${libexecdir} \
 "
 FILES_${PN}-misc = "/usr/lib"
 PACKAGES += "${PN}-misc"
-RDEPENDS_${PN}-misc += "bash python"
+RDEPENDS_${PN}-misc += "bash python3-core"
 
 EXTRA_OECONF += "--disable-selinux \
          --with-sysroot=${PKG_CONFIG_SYSROOT_DIR} \
