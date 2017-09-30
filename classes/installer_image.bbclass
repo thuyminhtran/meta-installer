@@ -308,7 +308,7 @@ python __anonymous() {
                 if not os.path.exists(wrlinstaller_conf):
                     raise bb.parse.SkipPackage("The installer conf %s in WRL_INSTALLER_CONF doesn't exist!" % wrlinstaller_conf)
 
-        # The count of INSTALLER_TARGET_IMAGE and KICKSTART_FILE must match when set.
+        # The count of INSTALLER_TARGET_BUILD and KICKSTART_FILE must match when set.
         kickstart_files = d.getVar('KICKSTART_FILE', True)
         if kickstart_files:
             if len(kickstart_files.split()) != len(target_builds.split()):
