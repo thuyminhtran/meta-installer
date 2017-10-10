@@ -90,72 +90,117 @@ Building the target installer
    to specify the image recipe name, then the installer will install its
    RPMs to the target;
 
+2. Two main use cases
+   2.1 Installer image with ext2, ext3 or ext4 image from the target
+       build to be copied to local disk.
 
-The following example is to install a target image core-image-minimal
-by anaconda installer in host image core-image-install.
+   2.2 Installer image with RPMs from the target build to be installed
+       to local disk.
 
-mkdir -p /home/jiahongxu/yocto; cd /home/jiahongxu/yocto
+   Note: Each option requires two builds, one is for the target build,
+         the other one is for the installer itself. The build and installer
+         board (BSP) configuration should be the same.
 
-1) Clone away
-git clone git://git.openembedded.org/meta-openembedded
-git clone git://git.openembedded.org/openembedded-core oe-core
-cd oe-core
-git clone git://git.openembedded.org/bitbake
+3. Examples for the use cases
+   The following example is to install a target image core-image-minimal
+   by host image core-image-install.
 
-2) Target build
-mkdir -p /home/jiahongxu/yocto/oe-core/build-target
-cd /home/jiahongxu/yocto/oe-core/build-target
-. ../oe-init-build-env
+   3.1 Image Based Install
+       3.1.1 Clone away
 
-# The build requires 'installer-support' in DISTRO_FEATURES to
-# help installation. It also requires RPM packages and systemd
-# init manager.
-# Edit conf/local.conf to use:
-echo 'DISTRO_FEATURES_append = " installer-support"' >> conf/local.conf
-echo 'PACKAGE_CLASSES = "package_rpm"' >> conf/local.conf
-echo 'VIRTUAL-RUNTIME_init_manager = "systemd"' >> conf/local.conf
-echo 'DISTRO_FEATURES_append = " systemd"' >> conf/local.conf
+           $ mkdir <installer-project>
+           $ cd <installer-project>
+           $ git clone git://git.openembedded.org/meta-openembedded
+           $ git clone git://git.openembedded.org/openembedded-core oe-core
+           $ cd oe-core
+           $ git clone git://git.openembedded.org/bitbake
 
-# Edit conf/bblayers.conf to include other layers
-BBLAYERS ?= " \
-  /home/jiahongxu/yocto/oe-core/meta \
-  /home/jiahongxu/yocto/meta-openembedded/meta-python \
-  /home/jiahongxu/yocto/meta-openembedded/meta-gnome \
-  /home/jiahongxu/yocto/meta-openembedded/meta-filesystems \
-  /home/jiahongxu/yocto/meta-openembedded/meta-oe \
-  /home/jiahongxu/yocto/meta-openembedded/meta-networking \
-  /home/jiahongxu/yocto/meta-openembedded/meta-initramfs \
-  /home/jiahongxu/yocto/meta-installer \
-  "
+       3.1.2 Prepare target build
 
-# Build image which will be installed to target hard disk.
-bitbake core-image-minimal
+           $ . <installer-project>/oe-core/oe-init-build-env <target_build>
 
-3) Host build
-mkdir -p /home/jiahongxu/yocto/oe-core/build-host
-cd /home/jiahongxu/yocto/oe-core/build-host
-. ../oe-init-build-env
+           The build requires 'installer-support' in DISTRO_FEATURES to
+           help installation. It also requires RPM packages and systemd
+           init manager. Edit conf/local.conf to use:
+           $ echo 'DISTRO_FEATURES_append = " installer-support"' >> conf/local.conf
+           $ echo 'PACKAGE_CLASSES = "package_rpm"' >> conf/local.conf
+           $ echo 'VIRTUAL-RUNTIME_init_manager = "systemd"' >> conf/local.conf
+           $ echo 'DISTRO_FEATURES_append = " systemd"' >> conf/local.conf
 
-# The build requires DISTRO = "installer", location of target
-# build and recipe name of target image.
-# Edit conf/local.conf to use:
-echo 'DISTRO = "installer"' >> conf/local.conf
-echo 'INSTALLER_TARGET_BUILD = "/home/jiahongxu/yocto/oe-core/build-target"' >> conf/local.conf
-echo 'INSTALLER_TARGET_IMAGE = "core-image-minimal"' >> conf/local.conf
+           Edit conf/bblayers.conf to include other layers
+           BBLAYERS ?= " \
+               <installer-project>/oe-core/meta \
+               <installer-project>/meta-openembedded/meta-python \
+               <installer-project>/meta-openembedded/meta-gnome \
+               <installer-project>/meta-openembedded/meta-filesystems \
+               <installer-project>/meta-openembedded/meta-oe \
+               <installer-project>/meta-openembedded/meta-networking \
+               <installer-project>/meta-openembedded/meta-initramfs \
+               <installer-project>/meta-installer \
+           "
 
-# Edit conf/bblayers.conf to include other layers
-BBLAYERS ?= " \
-  /home/jiahongxu/yocto/oe-core/meta \
-  /home/jiahongxu/yocto/meta-openembedded/meta-python \
-  /home/jiahongxu/yocto/meta-openembedded/meta-gnome \
-  /home/jiahongxu/yocto/meta-openembedded/meta-filesystems \
-  /home/jiahongxu/yocto/meta-openembedded/meta-oe \
-  /home/jiahongxu/yocto/meta-openembedded/meta-networking \
-  /home/jiahongxu/yocto/meta-openembedded/meta-initramfs \
-  /home/jiahongxu/yocto/meta-installer \
-  "
+       3.1.3 Build target image in <target_build>.
 
-# Build the image to run installer program
-bitbake core-image-installer
+           $ bitbake core-image-minimal
 
+       3.1.4 Prepare installer build.
+           $ . <installer-project>/oe-core/oe-init-build-env <installer_build>
+
+           The build requires DISTRO = "installer", location of target image.
+           Edit conf/local.conf to use:
+           $ echo 'PACKAGE_CLASSES = "package_rpm"' >> conf/local.conf
+           $ echo 'DISTRO = "installer"' >> conf/local.conf
+           $ echo 'INSTALLER_TARGET_BUILD = "<target_build>/tmp-glibc/deploy/images/qemux86/core-image-minimal-qemux86.ext4"' >> conf/local.conf
+
+           Edit conf/bblayers.conf to include other layers
+           BBLAYERS ?= " \
+               <installer-project>/oe-core/meta \
+               <installer-project>/meta-openembedded/meta-python \
+               <installer-project>/meta-openembedded/meta-gnome \
+               <installer-project>/meta-openembedded/meta-filesystems \
+               <installer-project>/meta-openembedded/meta-oe \
+               <installer-project>/meta-openembedded/meta-networking \
+               <installer-project>/meta-openembedded/meta-initramfs \
+               <installer-project>/meta-installer \
+           "
+
+       3.1.5 Build installer image in installer_build.
+
+           $ bitbake core-image-installer
+
+   3.2 Package Based Install
+       3.2.1 Clone away
+             The same with 3.1.1
+
+       3.2.2 Prepare target build
+             The same with 3.1.2
+
+       3.2.3 Build target image in <target_build>.
+             The same with 3.1.3
+
+       3.2.4 Prepare installer build.
+           $ . <installer-project>/oe-core/oe-init-build-env <installer_build>
+
+           The build requires DISTRO = "installer", location of target build
+           and recipe name of target image.
+           Edit conf/local.conf to use:
+           $ echo 'PACKAGE_CLASSES = "package_rpm"' >> conf/local.conf
+           $ echo 'DISTRO = "installer"' >> conf/local.conf
+           $ echo 'INSTALLER_TARGET_BUILD = "<target_build>"' >> conf/local.conf
+           $ echo 'INSTALLER_TARGET_IMAGE = "core-image-minimal"' >> conf/local.conf
+
+           Edit conf/bblayers.conf to include other layers
+           BBLAYERS ?= " \
+               <installer-project>/oe-core/meta \
+               <installer-project>/meta-openembedded/meta-python \
+               <installer-project>/meta-openembedded/meta-gnome \
+               <installer-project>/meta-openembedded/meta-filesystems \
+               <installer-project>/meta-openembedded/meta-oe \
+               <installer-project>/meta-openembedded/meta-networking \
+               <installer-project>/meta-openembedded/meta-initramfs \
+               <installer-project>/meta-installer \
+           "
+
+       3.2.4 Build installer image in installer_build.
+             The same with 3.1.4
 
