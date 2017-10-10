@@ -204,3 +204,79 @@ Building the target installer
        3.2.4 Build installer image in installer_build.
              The same with 3.1.4
 
+4. Install
+   4.1 Burn the output ISO to a DVD or dd it to a USB disk, and use it to
+       boot the target board and start the install.
+
+   4.2 Use qemu for testing
+       Build target installer with machine of qemux86
+
+       Create the qemu disk:
+       $ <installer_build>/tmp-glibc/sysroots-components/x86_64/qemu-native/usr/bin/qemu-img create -f qcow hd0.vdisk 5000M
+
+       Start qemu with installer image:
+       $ runqemu qemux86 core-image-installer iso slirp kvm qemuparams="-drive file=hd0.vdisk,if=virtio,format=qcow"
+
+       Add "-vnc :4" to qemuparams to start a VNC capable session.
+       Add "-m 1024" to qemuparams to allocate enough memory.
+
+       Start qemu with installed target:
+       $ runqemu qemux86 core-image-installer iso slirp kvm qemuparams="-drive file=hd0.vdisk,if=virtio,format=qcow -boot menu=on"
+
+       Run vncviewer to connect VNC capable session.
+       $ vncviewer <host-ip-address>:4
+
+       Add "-boot menu=on" to qemuparams and run vncviewer to connect,
+       press ESC key, manually choose "2. Virtio disk" "to boot from hard disk.
+
+   4.3 Use virtualbox for testing
+       4.3.1 Prepare virtualbox
+             Take Ubuntu 16.04 for example, the virtualbox is 5.0.40
+             sudo apt-get install virtualbox
+
+       4.3.2 Create virtual machine
+             'New'-> Name:***
+                     Type:Linux
+                     Version:Linux 2.6/3.x/4.x(32 bit)
+                     Memory size: 1024MB
+                     Hard disk: Create a virtual hard disk now
+             'Create'-> VDI(Virtualbox Disk Image)
+
+       4.3.3 Add ISO storage to virtual machine
+             Select newly created virtual machine
+             'Setting'-> 'Storage'-> 'Controller:SATA'->
+             'Adds optical drive' -> 'Choose disk' ->
+             'core-image-installer-qemux86.iso'
+
+             Remove IDE Empty optical
+             'Setting'-> 'Storage'-> 'Controller:IDE'->
+             'Empyt' -> Removes selected storage attachment
+
+       4.3.4 Config net for virtual machine
+             Select newly created virtual machine
+             'Setting'-> 'Network'-> 'Enable Network Adapter'->
+             'Attached to: Bridged Adapter'-> 'Name: eno1'
+
+       4.3.5 Add serial port to virtual machine
+             Select newly created virtual machine
+             'Setting'-> 'Serial Ports'-> 'Port 1'->
+             'Enable Serial Port'-> Port Number: COM1
+                                    Port Mode: Host Pipe
+                                    Unselect 'Connect to existing pipe/socket'
+                                    Path/Address: /tmp/pipe
+
+       4.3.6 Use minicom to connect virtual machine's serial port
+             sudo minicom -s
+             'Serial port setup'->
+             'A -    Serial Device      : unix#/tmp/pipe'->
+             'Exit'
+
+       4.3.7 Start virtual machine
+             Select newly created virtual machine-> 'Start'
+
+             After the installation finished, delete ISO storage and
+             start virtual machine again to check the installed target.
+
+   4.4 Need 1G memory size at least
+       While starting qemu/virtualbox/vmware for testing, please make
+       sure virtual machine has 1G memory at least.
