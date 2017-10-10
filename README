@@ -280,3 +280,39 @@ Building the target installer
    4.4 Need 1G memory size at least
        While starting qemu/virtualbox/vmware for testing, please make
        sure virtual machine has 1G memory at least.
+
+5. Use custom installer.conf
+   The second build can use installer.conf to help speed up the build
+   process when package based installs, the user can set WRL_INSTALLER_CONF
+   in the conf file, for example:
+
+   edit local.conf
+   WRL_INSTALLER_CONF = "/my/installer.conf"
+
+   You can customize the contents of installer.conf when needed, for example,
+   add packages that you will like to install, but if you do, you must ensure
+   that the added packages are in the target build (target_build).
+
+   To do this, use the file /.buildstamp after the installation and edit it
+   for later installs.
+
+6. Perform the kickstart installation
+   The installer can support kickstart installs. To do this, use the ks file
+   from /root/anaconda-ks.cfg after the installation and edit it for later
+   installs. You can specify the ks file by setting KICKSTART_FILE in the conf
+   file, for example:
+
+   KICKSTART_FILE = "/my/anaconda-ks.cfg"
+
+   Then the second build will take it and start the kickstart installs
+   by default when you start the target with installer image.
+
+7. About Grub version
+   The current installer only supports grub 2.
+
+8. How to create RPM metadata in build
+   bitbake package-index
+
+   There is a repodata in deploy dir:
+   $ find tmp-glibc/deploy/rpm/ -name repodata
+   tmp-glibc/deploy/rpm/repodata
