@@ -316,3 +316,51 @@ Building the target installer
    There is a repodata in deploy dir:
    $ find tmp-glibc/deploy/rpm/ -name repodata
    tmp-glibc/deploy/rpm/repodata
+
+9. Put multiple target builds into one installer image
+   9.1 Create and build multiple target build projects.
+       Refer to section 3.1.1 on how to setup and build each target project.
+       In this example, the projects are named target_build1, target_build2 and
+       target_build3. The target_build1 and target_build2 are build dirs,
+       target_build3 is ext4 file. Build 'core-image-sato' in
+       target_build1 and build 'core-image-minimal' in target_build2.
+
+   9.2 Edit local.conf, use variable INSTALLER_TARGET_BUILD to point to
+       "<target_build1> <target_build2> <target_build3>", and set
+       INSTALLER_TARGET_IMAGE = "core-image-sato core-image-minimal",
+       the space is the separator:
+
+       $ bitbake core-image-installer
+
+       Then the installer image will contain all target builds specified,
+       including target_build1, target_build2 and target_build3.
+
+       When you boot the installer image, you will get a selection menu:
+       NOTE: target_buildX is the basename of project
+
+       =============== Found the following products ===============
+       1) DISTRO1    target_build1    DISTRO_NAME1    DISTRO_VERION1
+       2) DISTRO2    target_build2    DISTRO_NAME2    DISTRO_VERION2
+       3) <target_build3-ext4-file>-3
+
+       Please enter your choice (0 to quit):
+
+       NOTE: You need to use a proper name for the target build project
+             since its basename will be used in the selection menus.
+
+       NOTE: The number of the entries in WRL_INSTALLER_CONF or
+             KICKSTART_FILE must be the same as the number of target build
+             projects.
+             For example, if you want to use WRL_INSTALLER_CONF or
+             KICKSTART_FILE for target_build1, target_build2 and
+             target_build3, set each of the three in the conf file.
+
+             WRL_INSTALLER_CONF = "/my/target1.conf /my/target2.conf \
+                                    /my/target3.conf"
+             KICKSTART_FILE = "/my/target1.ks /my/target2.ks \
+                               /my/target3.ks"
+
+             Then target_build1 will use /my/target1.conf and /my/target1.ks,
+             target_build2 and target_build3 will work similarly.
+
+
